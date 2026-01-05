@@ -13,7 +13,7 @@ st.set_page_config(
 
 # ============= ANALYTICS SETUP =============
 # Replace with your Google Analytics Measurement ID
-GOOGLE_ANALYTICS_ID = "G-XXXXXXXXXX"  # CHANGE THIS!
+GOOGLE_ANALYTICS_ID = "G-SQ53G5JRDY"  # CHANGE THIS!
 
 # Inject Google Analytics
 GA_JS = f"""
