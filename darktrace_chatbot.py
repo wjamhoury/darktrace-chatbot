@@ -9,6 +9,22 @@ st.set_page_config(
     layout="wide"
 )
 
+# Google Analytics 4 Implementation
+# Measurement ID: G-V40M62X7HE
+GA_TRACKING_CODE = """
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V40M62X7HE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-V40M62X7HE');
+</script>
+"""
+
+# Inject GA tracking code into the page
+st.components.v1.html(GA_TRACKING_CODE, height=0, width=0)
+
 # Custom CSS for Darktrace branding
 st.markdown("""
 <style>
