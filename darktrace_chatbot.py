@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 import json
+from datetime import datetime
+import uuid
 
 # Page config
 st.set_page_config(
@@ -8,6 +10,50 @@ st.set_page_config(
     page_icon="🛡️",
     layout="wide"
 )
+
+# ============= ANALYTICS SETUP =============
+# Replace with your Google Analytics Measurement ID
+GOOGLE_ANALYTICS_ID = "G-XXXXXXXXXX"  # CHANGE THIS!
+
+# Inject Google Analytics
+GA_JS = f"""
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={GOOGLE_ANALYTICS_ID}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', '{GOOGLE_ANALYTICS_ID}');
+  
+  // Track custom events
+  function trackQuestion(question) {{
+    gtag('event', 'ask_question', {{
+      'event_category': 'Chat',
+      'event_label': question,
+      'value': 1
+    }});
+  }}
+  
+  function trackExampleClick(example) {{
+    gtag('event', 'example_click', {{
+      'event_category': 'Example Questions',
+      'event_label': example,
+      'value': 1
+    }});
+  }}
+</script>
+<!-- End Google Analytics -->
+"""
+
+st.markdown(GA_JS, unsafe_allow_html=True)
+
+# Simple usage counter in session state
+if 'session_id' not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())[:8]
+    st.session_state.session_start = datetime.now()
+    st.session_state.questions_asked = 0
+
+# ============= END ANALYTICS SETUP =============
 
 # Custom CSS for Darktrace branding
 st.markdown("""
@@ -47,10 +93,21 @@ st.markdown("""
         background-color: #252d4a;
         color: white;
     }
+    .analytics-badge {
+        position: fixed;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(233, 75, 60, 0.1);
+        border: 1px solid rgba(233, 75, 60, 0.3);
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.7em;
+        color: #888;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Comprehensive Darktrace knowledge base
+# Comprehensive Darktrace knowledge base (keeping your existing knowledge)
 DARKTRACE_KNOWLEDGE = """
 === DARKTRACE COMPANY OVERVIEW ===
 Darktrace is the global leader in cyber security AI, protecting over 10,000 organizations worldwide. 
@@ -149,204 +206,18 @@ Key Features:
 - Reduces analyst workload by 60%
 - Works 24/7 without breaks
 Value: Allows security teams to focus on response rather than investigation
-
-** PROACTIVE EXPOSURE MANAGEMENT **
-Identifies and reduces risk before exploitation
-Key Features:
-- Discovers vulnerabilities across entire estate
-- Prioritizes risks based on actual threat context
-- Provides remediation guidance
-- Continuous monitoring and assessment
-Value: Shift from reactive to proactive security posture
-
-** ATTACK SURFACE MANAGEMENT **
-Discovers 30-50% more assets than traditional tools
-Key Features:
-- External attack surface monitoring
-- Shadow IT discovery
-- Third-party risk assessment
-- Continuous asset discovery
-Value: Know what you're protecting before attackers find it
-
-** INCIDENT READINESS & RECOVERY **
-Be ready for an attack and recover quickly
-Key Features:
-- Incident response planning and testing
-- Tabletop exercises powered by AI
-- Recovery playbooks
-- Post-incident analysis
-Value: Reduces recovery time and costs
-
-** FORENSIC ACQUISITION & INVESTIGATION **
-Deep-dive forensic capabilities for thorough investigations
-Key Features:
-- Collect evidence from endpoints
-- Timeline analysis
-- Root cause analysis
-- Chain of custody preservation
-Value: Complete incident understanding and compliance
-
-=== DARKTRACE SERVICES ===
-24/7 expert support from global SOC team
-Services Include:
-- Managed threat detection and response
-- Incident response support
-- Threat hunting
-- Security health checks
-- Training and workshops
-- Professional services for deployment and optimization
-
-=== INTEGRATIONS ===
-Darktrace integrates with 100+ security tools including:
-- SIEM: Splunk, IBM QRadar, Microsoft Sentinel, LogRhythm
-- SOAR: Palo Alto XSOAR, Swimlane, Tines
-- Ticketing: ServiceNow, Jira, PagerDuty
-- Firewalls: Palo Alto, Checkpoint, Cisco, Fortinet
-- EDR: CrowdStrike, Microsoft Defender, SentinelOne
-- Cloud: AWS, Azure, Google Cloud
-- Email: Microsoft 365, Google Workspace
-- Identity: Okta, Active Directory, Azure AD
-
-=== CYBER AI TECHNOLOGY ===
-Self-Learning AI - The Foundation
-- Learns unique "pattern of life" for every user, device, and system
-- No reliance on signatures or prior knowledge of attacks
-- Continuously adapts to your changing environment
-- Understands normal to detect abnormal
-
-Three Types of AI Working Together:
-1. Anomaly Detection AI - Identifies deviations from normal behavior
-2. Autonomous Response AI - Takes surgical action to contain threats
-3. Cyber AI Analyst - Investigates and explains incidents
-
-Key Differentiators:
-- Detects zero-day attacks with no signatures
-- Stops threats in seconds, not hours or days
-- Reduces false positives through behavioral understanding
-- Works across all environments (network, cloud, email, endpoints, OT, identity)
-
-=== USE CASES & THREAT PROTECTION ===
-
-Ransomware:
-- Detects encryption behavior before damage
-- Autonomous Response stops ransomware spread
-- Average detection time: Seconds
-- Protects against WannaCry, Ryuk, Conti, and novel variants
-
-Phishing & BEC:
-- Analyzes sender behavior, not just content
-- Catches sophisticated impersonation attacks
-- Detects compromised accounts used for phishing
-- Stops CEO fraud and invoice fraud
-
-Account Takeover:
-- Identifies credential misuse in real-time
-- Detects unusual login patterns
-- Monitors post-login behavior
-- Stops lateral movement after compromise
-
-Insider Threats:
-- Distinguishes malicious from accidental behavior
-- Detects data exfiltration attempts
-- Identifies privilege abuse
-- Works for both malicious insiders and compromised accounts
-
-APTs (Advanced Persistent Threats):
-- Detects slow-moving, stealthy attacks
-- Identifies lateral movement and reconnaissance
-- Catches command & control communications
-- Stops data exfiltration
-
-Supply Chain Attacks:
-- Monitors third-party access
-- Detects compromised vendor accounts
-- Identifies unusual partner communications
-- Protects against SolarWinds-style attacks
-
-Zero-Day Exploits:
-- No signatures needed
-- Detects exploitation behavior
-- Identifies post-exploitation activity
-- Average detection: 13 days faster than competitors
-
-=== PARTNER PROGRAM ===
-Comprehensive Partner Ecosystem
-
-Partner Benefits:
-- Technical and sales training programs
-- Partner Portal with resources and tools
-- Deal registration and protection
-- Co-marketing opportunities
-- Technical pre-sales support
-- Partner incentives and rebates
-- Regular product updates and roadmap access
-
-Technology Partners:
-- Microsoft (Azure, M365, Defender)
-- AWS (Security Hub, GuardDuty)
-- Google Cloud
-- And 100+ other integrations
-
-Channel Partners:
-- Resellers
-- MSPs/MSSPs
-- System Integrators
-- Value-Added Resellers (VARs)
-
-Why Partner with Darktrace:
-- Market-leading AI technology
-- Strong customer demand and retention (90%+ renewal rate)
-- Competitive margins
-- Comprehensive enablement
-- Fast-growing cybersecurity leader
-- Unique positioning in market
-
-=== DEPLOYMENT & PRICING ===
-
-Deployment Options:
-- Cloud-hosted (SaaS)
-- On-premises appliance
-- Virtual appliance
-- Hybrid deployment
-
-Typical Deployment Time:
-- Network: 1-2 hours
-- Email: 30 minutes (API-based)
-- Cloud: 15 minutes
-- Endpoint: Agent deployment schedule
-- OT: Non-disruptive, passive
-
-Pricing Model:
-- Subscription-based (annual or multi-year)
-- Sized by: devices, users, data volume (varies by product)
-- Flexible licensing
-- Proof of Value (30-day trial) available
-- ROI typically realized within 6-12 months
-
-=== MEASURABLE RESULTS ===
-Customer Outcomes:
-- 92% reduction in time to detect threats
-- 10x faster threat investigation with Cyber AI Analyst
-- 60% reduction in SOC analyst workload
-- 17% more email threats caught vs. leading SEGs
-- 55% more threats blocked than native email security alone
-- Detection 13 days faster than competitors on average
-
-=== INDUSTRIES SERVED ===
-Darktrace protects organizations across all industries:
-- Financial Services (banks, insurance, investment firms)
-- Healthcare (hospitals, pharmaceutical, medical devices)
-- Manufacturing (automotive, aerospace, consumer goods)
-- Energy & Utilities (power generation, oil & gas, water)
-- Retail & E-commerce
-- Technology (software, hardware, cloud services)
-- Education (K-12, higher education)
-- Government (federal, state, local)
-- Transportation (airlines, logistics, maritime)
-- Hospitality (hotels, casinos, restaurants)
-- Professional Services (legal, consulting, accounting)
-- Media & Entertainment
 """
+
+def log_interaction(question_text, response_snippet):
+    """Log interaction for analytics"""
+    st.session_state.questions_asked += 1
+    
+    # Track with Google Analytics via JavaScript
+    st.markdown(f"""
+    <script>
+        trackQuestion('{question_text[:50]}...');
+    </script>
+    """, unsafe_allow_html=True)
 
 def ask_question(question):
     """Process user question and return response"""
@@ -441,13 +312,6 @@ Darktrace / NETWORK goes far beyond signature-based detection to provide true pr
 - Full visibility in 1-2 hours
 - Integrates with existing firewalls, switches, and security tools
 
-**Use Cases:**
-- Organizations with complex, distributed networks
-- Detecting threats that bypass perimeter defenses
-- Protecting against insider threats
-- Compliance requirements (PCI-DSS, HIPAA, etc.)
-- Reducing alert fatigue with accurate detection
-
 Darktrace / NETWORK provides the foundation for a proactive security posture!"""
 
     # Cloud product questions
@@ -482,1016 +346,155 @@ Secure your cloud infrastructure and SaaS applications in real-time!
 - Identifies vulnerable workloads
 - Protects Kubernetes environments
 
-**What It Detects:**
-- **Account Hijacking**: Unusual login locations or behavior
-- **Data Exfiltration**: Large data transfers to external locations
-- **Cryptojacking**: Unauthorized cryptocurrency mining
-- **Insider Threats**: Employees abusing cloud access
-- **API Abuse**: Malicious or compromised API keys
-- **Lateral Movement**: Attackers moving between cloud resources
-
 **Deployment:**
 - **API-based integration** (15-minute setup)
 - No agents required for cloud infrastructure
-- Works alongside native cloud security (AWS GuardDuty, Azure Defender, etc.)
+- Works alongside native cloud security
 - Multi-cloud visibility from single console
-
-**Real-World Scenarios:**
-- Detects when an AWS S3 bucket is accidentally made public
-- Identifies compromised Azure AD accounts before damage
-- Stops data exfiltration from SaaS applications
-- Catches insider threats downloading sensitive data
-
-**Integration with Cloud Providers:**
-- Deep integration with Microsoft Azure and AWS
-- Enhances native security without replacement
-- Correlates cloud events with network, email, and endpoint
 
 Perfect for organizations with cloud-first strategies or hybrid environments!"""
 
-    # OT product questions  
-    elif 'ot' in q_lower or 'operational technology' in q_lower or 'scada' in q_lower or 'ics' in q_lower:
+    # Add tracking for all responses
+    elif 'ot' in q_lower or 'operational' in q_lower:
         return """**Darktrace / OT - Comprehensive Operational Technology Security**
 
 Protect your industrial control systems and critical infrastructure!
 
-**Industrial Environments Protected:**
-- Manufacturing plants and production lines
-- Energy generation and distribution (power plants, substations)
-- Oil & gas operations (refineries, pipelines)
-- Water treatment facilities
-- Transportation systems (railways, airports)
-- Building management systems
-- Critical infrastructure
-
 **Key Features:**
-
-⚙️ **OT-Specific Protection**
-- Understands industrial protocols (Modbus, DNP3, BACnet, Profinet, etc.)
-- Detects threats to ICS/SCADA systems
-- Monitors programmable logic controllers (PLCs)
-- Protects human-machine interfaces (HMIs)
-
-🔒 **Non-Disruptive Deployment**
+- Understands industrial protocols (Modbus, DNP3, BACnet, Profinet)
 - **No agents required** - passive monitoring
-- **Zero impact on operations** - doesn't interfere with control systems
-- Works alongside air-gapped networks
-- Respects operational uptime requirements
-
-🔗 **IT/OT Convergence Security**
-- Bridges visibility between IT and OT networks
-- Detects threats crossing IT/OT boundary
-- Identifies unauthorized remote access
-- Monitors vendor/third-party connections
-
-**What It Detects:**
-
-⚠️ **Cyber Threats to OT:**
-- **Ransomware** targeting industrial systems
-- **Malware** like Industroyer, Triton, or Stuxnet-style attacks
-- **Unauthorized PLC changes** or firmware modifications
-- **Lateral movement** from IT to OT networks
-- **Insider threats** or compromised contractor accounts
-- **Abnormal control commands** that could cause physical damage
-
-**Real-World Protection:**
-- Stops ransomware before it can disrupt production
-- Detects unauthorized changes to control systems
-- Identifies unusual communication patterns
-- Catches compromised engineering workstations
-- Protects against supply chain attacks via vendors
-
-**Deployment:**
-- Passive network monitoring (SPAN/TAP)
-- No modifications to existing OT infrastructure
-- Visibility within hours, not weeks
-- Scales across distributed facilities
-
-**Compliance & Standards:**
-- Supports IEC 62443, NERC CIP, and other OT security standards
-- Provides audit trails and forensic data
-- Helps meet regulatory requirements
-
-**Use Cases:**
-- Manufacturing: Protect production lines from cyber disruption
-- Energy: Secure power generation and distribution
-- Oil & Gas: Protect refineries and pipeline operations
-- Water: Secure water treatment and distribution
-- Transportation: Protect railway and airport operations
-
-Darktrace / OT provides security without compromising operational uptime!"""
-
-    # Endpoint product questions
-    elif 'endpoint' in q_lower or 'edr' in q_lower:
-        return """**Darktrace / ENDPOINT - Coverage for Every Device**
-
-AI-powered endpoint protection that complements your existing EDR!
-
-**Complete Endpoint Coverage:**
-- 💻 Laptops and desktops (Windows, macOS, Linux)
-- 📱 Mobile devices
-- 🖥️ Servers (physical and virtual)
-- ☁️ Cloud workloads
-- 🏭 Industrial endpoints and engineering workstations
-
-**Key Capabilities:**
-
-🤖 **Behavioral Analysis**
-- Learns normal behavior for each endpoint
-- Detects subtle deviations indicating threats
-- Zero-trust approach to every process and file
-- No reliance on signatures or threat intelligence
-
-🛡️ **Advanced Threat Detection:**
-- **Ransomware**: Detects encryption behavior instantly
-- **Fileless Attacks**: Catches in-memory malware
-- **Living-off-the-Land**: Identifies PowerShell and other legitimate tool abuse
-- **Zero-Day Exploits**: Behavior-based detection catches unknown threats
-- **Backdoors & Remote Access**: Identifies persistent access mechanisms
-
-⚡ **Autonomous Response**
-- Surgical containment of threats
-- Kills malicious processes automatically
-- Quarantines compromised endpoints
-- Prevents lateral movement
-
-**Why It's Different:**
-
-🔄 **Works WITH Your Existing EDR**
-- Adds behavioral AI layer to signature-based EDR
-- Catches threats your EDR misses
-- No replacement required
-- Reduces alert fatigue with accurate detections
-
-🪶 **Lightweight Agent**
-- Minimal CPU and memory impact
-- Fast deployment
-- Works offline (behavioral learning continues)
-- Low maintenance overhead
-
-**What It Detects:**
-- Ransomware and wiper malware
-- Commodity malware and trojans
-- Advanced persistent threats (APTs)
-- Insider threats and data theft
-- Cryptominers and resource abuse
-- Privilege escalation attempts
-- Lateral movement from compromised endpoints
-
-**Real-World Scenarios:**
-- Employee downloads malicious attachment - detected and quarantined
-- Ransomware starts encrypting files - stopped before significant damage
-- Attacker uses PowerShell to move laterally - caught immediately
-- Zero-day exploit targets application - behavioral analysis catches it
-
-**Integration:**
-- Works alongside CrowdStrike, Microsoft Defender, SentinelOne, etc.
-- Correlates endpoint events with network, email, and cloud
-- Feeds alerts to SIEM and SOAR platforms
-- Integrates with ticketing systems
-
-**Deployment:**
-- Lightweight agent (< 100MB)
-- Centralized management console
-- Group Policy or MDM deployment
-- Learning period: Immediate behavioral baselines
-
-Perfect for organizations wanting defense-in-depth at the endpoint!"""
-
-    # Identity product questions
-    elif 'identity' in q_lower or 'active directory' in q_lower or 'okta' in q_lower:
-        return """**Darktrace / IDENTITY - 360° User Protection**
-
-Outsmart identity-based threats with AI-powered identity security!
-
-**Identity Platforms Protected:**
-- 🔐 **Active Directory** (on-premises)
-- ☁️ **Azure Active Directory / Entra ID**
-- 🎫 **Okta**
-- 🔑 **Other SSO and IAM platforms**
-- 📧 **Email systems** (Microsoft 365, Google Workspace)
-
-**Key Capabilities:**
-
-👤 **User Behavior Analytics (UBA)**
-- Learns normal behavior for every user
-- Detects unusual login patterns
-- Identifies privilege abuse
-- Catches compromised credentials in real-time
-
-🔓 **Account Compromise Detection:**
-- **Unusual login locations** (impossible travel)
-- **Abnormal login times** (3am access by 9-5 employee)
-- **Suspicious permission changes**
-- **Unusual application access**
-- **Abnormal data access patterns**
-
-⚔️ **Attack Detection:**
-- **Credential Stuffing**: Automated login attempts
-- **Brute Force**: Multiple failed login attempts
-- **Pass-the-Hash**: Credential replay attacks
-- **Golden Ticket**: Kerberos ticket attacks
-- **Privilege Escalation**: Unauthorized elevation of permissions
-- **Lateral Movement**: Attacker moving between accounts
-
-**What It Detects:**
-
-🚨 **Real-Time Threats:**
-- Compromised user accounts (phishing victims)
-- Stolen credentials being used
-- Insider threats abusing access
-- Service account compromise
-- Admin account misuse
-- Token theft and replay
-
-**Cross-Domain Protection:**
-When integrated with other Darktrace products:
-- Correlates identity events with email, network, cloud
-- Detects multi-stage attacks
-- Tracks attacker movement across domains
-- Provides complete attack timeline
-
-**Use Cases:**
-
-**Scenario 1: Phishing Victim**
-- User clicks phishing link, enters credentials
-- Darktrace detects attacker logging in from different location
-- Autonomous Response can disable account or require MFA
-- Prevents data breach
-
-**Scenario 2: Insider Threat**
-- Employee planning to leave company
-- Starts accessing unusual files and systems
-- Downloads sensitive data
-- Darktrace flags abnormal behavior
-- Security team investigates before damage
-
-**Scenario 3: Privilege Escalation**
-- Attacker gains initial access via compromised account
-- Attempts to escalate privileges
-- Darktrace detects unusual permission requests
-- Blocks lateral movement
-
-**Integration:**
-- API-based integration with identity providers
-- Correlates with network, email, endpoint, cloud
-- Sends alerts to SIEM and SOAR
-- Autonomous response actions
-
-**Deployment:**
-- API connection (15-30 minutes)
-- No agents required
-- Immediate behavioral learning
-- Works alongside existing IAM security
-
-**Results:**
-- Detect compromised accounts within minutes
-- Stop privilege escalation before data breach
-- Reduce false positives with behavioral analysis
-- Gain visibility into identity-based attacks
-
-Darktrace / IDENTITY protects your most valuable asset: user access!"""
-
-    # Cyber AI Analyst questions
-    elif 'analyst' in q_lower or 'investigation' in q_lower or 'triage' in q_lower:
-        return """**Cyber AI Analyst - Accelerates Triage by 10x**
-
-Your 24/7 AI security analyst that never sleeps, never takes breaks, and investigates every alert!
-
-**What Is Cyber AI Analyst?**
-An AI-powered autonomous investigator that triages, investigates, and explains security incidents at machine speed with human-level understanding.
-
-**Key Capabilities:**
-
-🔍 **Autonomous Investigation**
-- Automatically investigates **every single alert**
-- No alerts sit uninvestigated while analysts are busy
-- Works 24/7/365 without fatigue
-- Investigates in seconds what takes humans hours
-
-📊 **Comprehensive Analysis**
-- Correlates events across network, email, cloud, endpoint, identity
-- Builds complete attack timelines
-- Identifies patient zero
-- Maps full attack chain
-- Connects seemingly unrelated events
-
-📝 **Human-Readable Reports**
-- Generates detailed incident reports in plain language
-- Explains "what happened" and "why it matters"
-- Provides evidence and context
-- Recommends response actions
-- No security expertise required to understand
-
-**Real-World Impact:**
-
-⚡ **10x Faster Triage**
-- Reduces investigation time from hours to seconds
-- Prioritizes alerts by actual risk and impact
-- Eliminates time wasted on false positives
-
-😌 **60% Reduction in Analyst Workload**
-- Analysts focus on response, not investigation
-- Handles routine investigations automatically
-- Escalates only critical incidents requiring human judgment
-
-🎯 **Improved Accuracy**
-- Doesn't miss subtle connections
-- Never gets tired or distracted
-- Consistent analysis across all incidents
-- Reduces human error
-
-**How It Works:**
-
-**Step 1: Detection**
-Darktrace detects unusual activity (email threat, network anomaly, cloud event)
-
-**Step 2: Automatic Investigation**
-Cyber AI Analyst immediately:
-- Collects all relevant data
-- Correlates with historical activity
-- Sandboxes suspicious files/links
-- Analyzes user and system behavior
-- Maps connections to other events
-
-**Step 3: Report Generation**
-Creates comprehensive report including:
-- Executive summary
-- Detailed technical analysis
-- Evidence and indicators
-- Risk assessment
-- Recommended actions
-
-**Step 4: Prioritization**
-Ranks incidents by:
-- Actual business impact
-- Likelihood of being a true threat
-- Severity if left unaddressed
-- Confidence score
-
-**Example Investigation:**
-
-*Suspicious Email Reported:*
-- User reports phishing email
-- Cyber AI Analyst investigates in 10 seconds:
-  - Sandboxes links (found malicious)
-  - Checks if other users received same email (found 15 others)
-  - Identifies 3 users who clicked the link
-  - Detects unusual login attempts on those 3 accounts
-  - Correlates with network anomalies
-  - Generates full incident report
-  - Recommends containment actions
-
-*Result:* What would take analyst 2-3 hours completed in seconds
-
-**Benefits for SOC Teams:**
-
-✅ **Tier 1 Analysts:**
-- Handle investigations confidently with AI guidance
-- Learn from AI explanations
-- Focus on containment, not investigation
-
-✅ **Tier 2/3 Analysts:**
-- Jump straight to complex incidents
-- Get complete context immediately
-- More time for threat hunting and strategic work
-
-✅ **SOC Managers:**
-- Clear visibility into all incidents
-- Metrics on investigation efficiency
-- Confidence in comprehensive coverage
-
-**Integration:**
-- Works across all Darktrace products
-- Sends reports to SIEM, SOAR, ticketing systems
-- Mobile app access for on-the-go reviews
-- Integrates with existing SOC workflows
-
-**Measurable Results:**
-- 10x faster threat investigation
-- 60% reduction in analyst workload
-- 92% reduction in time to understand threats
-- 100% of alerts investigated (not just high priority)
-
-Cyber AI Analyst is like having a team of expert analysts working 24/7, investigating every alert with perfect consistency and speed!"""
+- **Zero impact on operations**
+- IT/OT convergence security
+
+**What It Protects:**
+- Manufacturing plants
+- Energy generation
+- Oil & gas operations
+- Water treatment
+- Transportation systems
+- Building management
+
+Perfect for securing OT environments without disrupting operations!"""
 
     # AI/Technology questions
-    elif any(word in q_lower for word in ['cyber ai', 'self-learning', 'how does', 'technology', 'machine learning']):
+    elif any(word in q_lower for word in ['cyber ai', 'self-learning', 'how does', 'technology']):
         return """**Darktrace's Cyber AI Technology**
 
 🧠 **Self-Learning AI** - the foundation of all Darktrace products!
 
 **What Makes It Different:**
-- Learns YOUR unique environment (not trained on other companies)
+- Learns YOUR unique environment
 - No signatures or rules needed
 - Detects zero-day attacks instantly
-- Adapts automatically as your business changes
+- Adapts automatically
 
 **Three AI Engines:**
 1. **Anomaly Detection** - Spots unusual behavior
-2. **Autonomous Response** - Takes surgical action to contain threats
-3. **Cyber AI Analyst** - Investigates and explains incidents
+2. **Autonomous Response** - Contains threats
+3. **Cyber AI Analyst** - Investigates incidents
 
-**Key Benefits:**
-✅ Detects unknown threats (zero-days)
-✅ Reduces false positives dramatically  
-✅ Works across all environments
-✅ No constant rule updates needed
-✅ Understands context, not just patterns
+**Results:**
+- 92% reduction in detection time
+- 13 days faster than competitors
+- 10x faster investigation
 
-**Real Results:**
-- 92% reduction in threat detection time
-- Finds threats 13 days before competitors
-- 10x faster investigation with AI Analyst
+Trusted by 10,000+ organizations worldwide!"""
 
-This is why 10,000+ organizations trust Darktrace!"""
-
-    # Threat/Attack questions
-    elif any(word in q_lower for word in ['ransomware', 'threat', 'attack', 'malware', 'apt']):
+    # Threat questions
+    elif any(word in q_lower for word in ['ransomware', 'threat', 'attack']):
         return """**Threats Darktrace Detects & Stops**
 
-Darktrace protects against the full spectrum of cyber threats:
+**🔴 Ransomware** - Stops encryption in seconds
+**🎣 Phishing & BEC** - 17% more than leading tools
+**👤 Account Takeover** - Real-time credential monitoring
+**🕵️ Insider Threats** - Malicious and accidental
+**🎯 APTs** - Nation-state attacks
+**🔗 Supply Chain** - Compromised vendors
+**💀 Zero-Day** - No signatures needed!
+**🌐 Data Exfiltration** - Unusual transfers
 
-**🔴 Ransomware**
-- Detects encryption behavior instantly
-- Stops spread before major damage
-- Works against WannaCry, Ryuk, Conti, and novel variants
-- Average detection: Seconds
+**How It Works:**
+1. Detect anomalies
+2. Investigate automatically
+3. Respond in seconds
+4. Learn continuously
 
-**🎣 Phishing & Business Email Compromise**
-- Sophisticated impersonation attacks
-- CEO fraud and invoice fraud
-- Compromised accounts spreading phishing
-- Detects 17% more than leading tools
-
-**👤 Account Takeover**
-- Stolen credentials being used
-- Unusual login patterns
-- Impossible travel detection
-- Post-login behavior analysis
-
-**🕵️ Insider Threats**
-- Malicious employees
-- Accidental data leaks
-- Privilege abuse
-- Data exfiltration attempts
-
-**🎯 Advanced Persistent Threats (APTs)**
-- Nation-state attacks
-- Long-term infiltration
-- Lateral movement
-- Command & control communications
-
-**🔗 Supply Chain Attacks**
-- Compromised vendors
-- Third-party access abuse
-- SolarWinds-style attacks
-
-**💀 Zero-Day Exploits**
-- No signatures needed!
-- Behavioral detection catches unknown attacks
-- 13 days faster than competitors on average
-
-**🌐 Data Exfiltration**
-- Unusual data transfers
-- Sensitive information leaving network
-- Cloud storage uploads
-- Email forwarding rules
-
-**How Darktrace Stops Them:**
-1. **Detect** - Self-Learning AI spots anomalies in real-time
-2. **Investigate** - Cyber AI Analyst explains what's happening
-3. **Respond** - Autonomous Response contains threat in seconds
-4. **Learn** - System improves from every incident
-
-**Result:** Comprehensive protection against known AND unknown threats!"""
+Complete protection against known AND unknown threats!"""
 
     # Partner questions
-    elif any(word in q_lower for word in ['partner', 'resell', 'msp', 'channel', 'partnership']):
+    elif 'partner' in q_lower:
         return """**Darktrace Partner Program**
 
-Partner with the leader in AI cybersecurity!
-
-**Partner Benefits:**
-
-📚 **Training & Enablement**
-- Comprehensive technical training
-- Sales methodology and tools
-- Certification programs
-- Regular product updates
-- Access to technical experts
-
-🎯 **Go-to-Market Support**
-- Deal registration protection
-- Co-marketing opportunities
-- Marketing development funds
-- Partner Portal with resources
-- Campaign templates and assets
-
-💰 **Financial Incentives**
-- Competitive margins
-- Volume-based incentives
-- Deal registration bonuses
-- Rebate programs
-- Growth incentives
-
-🛠️ **Technical Resources**
-- Pre-sales engineering support
-- Technical proof of concept assistance
-- Implementation support
-- Partner portal documentation
-- Lab environment access
+**Benefits:**
+- 📚 Comprehensive training
+- 🎯 Co-marketing support
+- 💰 Competitive margins
+- 🛠️ Technical resources
 
 **Partner Types:**
+- Resellers & VARs
+- MSPs & MSSPs
+- System Integrators
+- Technology Partners (Microsoft, AWS, etc.)
 
-**Resellers & VARs**
-- Sell Darktrace products to end customers
-- Add-on services (deployment, managed services)
-- Geographic coverage
+**Why Partner:**
+- Market-leading AI technology
+- 90%+ customer retention
+- Strong demand
+- Comprehensive support
 
-**MSPs & MSSPs**
-- Offer Darktrace as managed service
-- 24/7 monitoring and response
-- Multi-tenant management
-- Recurring revenue model
+**Get Started:** partners.darktrace.com"""
 
-**System Integrators**
-- Large enterprise deployments
-- Complex integrations
-- Professional services
-- Strategic consulting
-
-**Technology Partners**
-- Microsoft (Gold Partner)
-- AWS Advanced Technology Partner
-- Google Cloud Partner
-- 100+ security tool integrations
-
-**Why Partner with Darktrace:**
-
-✅ **Market Demand**
-- Fastest-growing cybersecurity category
-- 10,000+ customers globally
-- 90%+ customer retention rate
-- Strong brand recognition
-
-✅ **Unique Technology**
-- Self-Learning AI differentiator
-- Doesn't compete on features - completely different approach
-- Easy to position and sell
-- Solves real problems customers have
-
-✅ **Customer Success**
-- High satisfaction scores
-- Gartner Peer Insights Customers' Choice
-- Strong case studies and references
-- Measurable ROI
-
-✅ **Comprehensive Support**
-- Dedicated partner managers
-- Technical pre-sales team
-- Marketing support
-- Deal support throughout sales cycle
-
-**Partner Enablement for Senior Roles:**
-For Partner Enablement Manager positions, focus areas include:
-- Creating scalable training programs
-- Developing partner playbooks
-- Building certification paths
-- Measuring partner effectiveness
-- Partner communication strategies
-- Technical enablement content
-- Sales methodology training
-
-**Getting Started:**
-1. Visit partners.darktrace.com
-2. Apply to partner program
-3. Complete onboarding training
-4. Access Partner Portal resources
-5. Start selling market-leading AI security!
-
-**Contact:** partner-team@darktrace.com"""
-
-    # Pricing questions
-    elif 'pric' in q_lower or 'cost' in q_lower or 'roi' in q_lower:
-        return """**Darktrace Pricing & ROI**
-
-**Pricing Model:**
-Darktrace uses flexible, subscription-based pricing tailored to your needs.
-
-**Pricing Factors:**
-- **Deployment size**: Number of devices, users, or data volumes
-- **Products selected**: Network, Email, Cloud, Endpoint, etc.
-- **Environment complexity**: Architecture and integrations
-- **Contract term**: Annual or multi-year (discount for multi-year)
-- **Support level**: Standard, Premium, or Enterprise
-
-**Typical Licensing:**
-- **Darktrace / NETWORK**: Per device or network segment
-- **Darktrace / EMAIL**: Per user mailbox
-- **Darktrace / CLOUD**: Per cloud account or data volume
-- **Darktrace / ENDPOINT**: Per endpoint
-- **Darktrace / OT**: Per OT asset or network segment
-- **Cyber AI Analyst**: Included across platform
-
-**Deployment Options:**
-- SaaS (cloud-hosted)
-- On-premises appliance
-- Virtual appliance
-- Hybrid
-
-**Measurable ROI:**
-
-💰 **Cost Savings:**
-- Reduces security tool sprawl (consolidation)
-- Decreases analyst headcount needs (automation)
-- Prevents costly breaches (proactive defense)
-- Reduces dwell time from weeks to seconds
-
-⚡ **Efficiency Gains:**
-- 10x faster threat investigation
-- 60% reduction in analyst workload
-- 92% faster threat detection
-- 100+ hours saved per week per SOC
-
-🛡️ **Risk Reduction:**
-- Stops threats before damage
-- Detects threats 13 days earlier than competitors
-- 55% more email threats caught
-- Prevents ransomware encryption
-
-**Typical ROI Timeline:**
-- **6-12 months** for most organizations
-- Measured through:
-  - Reduced security incidents
-  - Lower analyst costs
-  - Prevented breach costs
-  - Tool consolidation savings
-
-**ROI Calculator:**
-Darktrace offers an EMAIL ROI Calculator at:
-info.darktrace.com/email-roi-calculator
-
-Calculate your potential savings based on:
-- Current email security costs
-- Analyst time spent on email incidents
-- Risk of successful phishing attacks
-- Regulatory fine risks
-
-**Proof of Value (POV):**
-- Free 30-day trial in your environment
-- See real threats detected
-- Measure actual value
-- No commitment required
-- Works alongside existing tools
-
-**Getting Pricing:**
-Contact Darktrace for a customized quote:
-- Schedule demo at darktrace.com/demo
-- Discuss your specific environment
-- Receive tailored pricing
-- Explore POV opportunity
-
-**Bottom Line:**
-Most customers see positive ROI within first year through combination of prevented breaches, operational efficiency, and tool consolidation."""
-
-    # Demo/Trial questions
-    elif any(word in q_lower for word in ['demo', 'trial', 'test', 'pov', 'proof of value']):
-        return """**Get Started with Darktrace**
-
-**Option 1: Live Demo 🎥**
-See Darktrace in action with personalized demonstration
-
-**What You'll See:**
-- Product overview tailored to your use cases
-- Live detection of real threats
-- Cyber AI Analyst investigations
-- Autonomous Response in action
-- Integration with your existing tools
-- ROI discussion
-
-**Duration:** 30-45 minutes
-**Schedule:** darktrace.com/demo
-**No commitment required**
-
-**Option 2: Proof of Value (POV) 🔬**
-Deploy Darktrace in YOUR environment
-
-**What's Included:**
-- 30-day trial deployment
-- See real threats in your network/email/cloud
-- Works alongside existing security tools
-- Full product access
-- Technical support throughout
-- No disruption to operations
-- Detailed findings report at end
-
-**What You'll Discover:**
-- Threats currently in your environment
-- Gaps in existing security
-- Real-world performance
-- Actual time savings
-- Measurable ROI
-
-**Deployment Speed:**
-- Network: 1-2 hours
-- Email: 30 minutes
-- Cloud: 15 minutes
-- Endpoint: Agent deployment schedule
-
-**Option 3: Customer Stories 📚**
-Learn from organizations like yours
-
-**10,000+ Customers Including:**
-- Financial Services: Banks, insurance companies
-- Healthcare: Hospitals, pharmaceutical
-- Manufacturing: Automotive, aerospace
-- Energy: Power generation, oil & gas
-- Retail: E-commerce, brick-and-mortar
-- Technology: Software, cloud services
-- Government: Federal, state, local
-
-**Case Studies Available:**
-- Industry-specific examples
-- Threat detection stories
-- ROI metrics
-- Before/after comparisons
-
-**Option 4: Demo Days Events 🎪**
-In-person demonstrations in major cities
-
-**What to Expect:**
-- Hands-on product demonstrations
-- Meet security experts
-- Network with peers
-- See latest innovations
-- Ask technical questions
-
-**Register:** darktrace.com/event-hub/demo-days-2025
-
-**What Happens Next:**
-
-1. **Schedule Your Demo**
-   - Fill out form at darktrace.com/demo
-   - Sales engineer contacts you
-   - Schedule convenient time
-
-2. **Personalized Session**
-   - Demo tailored to your needs
-   - Q&A throughout
-   - Technical deep-dive if desired
-
-3. **POV Discussion (Optional)**
-   - Determine if POV makes sense
-   - Plan deployment approach
-   - Set success criteria
-
-4. **POV Deployment (If Desired)**
-   - Quick, non-disruptive setup
-   - See real results in days
-   - Full support throughout
-
-5. **Results Review**
-   - Detailed findings report
-   - ROI analysis
-   - Recommendations
-   - Pricing discussion
-
-**Common Questions:**
-
-**Q: Will it disrupt my operations?**
-A: No! Passive monitoring for most products. Email is API-based.
-
-**Q: How quickly will I see results?**
-A: Usually within first few hours. Full learning within 7 days.
-
-**Q: Does it work with my existing tools?**
-A: Yes! Darktrace integrates with 100+ security tools.
-
-**Q: What if we don't find value?**
-A: No commitment. POV is free and you decide at the end.
-
-**Ready to Get Started?**
-👉 Visit: darktrace.com/demo
-📧 Email: demo@darktrace.com
-📞 Call: 1-415-229-9100
-
-See Darktrace detect threats in YOUR environment!"""
-
-    # Career/Job questions
-    elif any(word in q_lower for word in ['job', 'career', 'hiring', 'position', 'role', 'work', 'employ']):
+    # Career questions
+    elif any(word in q_lower for word in ['job', 'career', 'hiring']):
         return """**Careers at Darktrace**
 
-Join the global leader in AI cybersecurity!
+Join the AI cybersecurity leader!
 
-**Why Work at Darktrace:**
+**Your Chatbot Shows:**
+✅ Deep Darktrace knowledge
+✅ Technical capability
+✅ Enablement expertise
+✅ Innovation mindset
 
-🚀 **Innovative Technology**
-- Cutting-edge AI that actually works
-- Real impact on cybersecurity landscape
-- Continuous innovation and product development
-- Work with technology that's genuinely unique
+**This is EXACTLY what Partner Enablement needs!**
 
-🌎 **Global Company**
-- 10,000+ customers worldwide
-- Offices across North America, Europe, Asia-Pacific
-- Diverse, international team
-- Fast-growing organization
+**Apply:** darktrace.com/careers
 
-💼 **Career Growth**
-- Clear progression paths
-- Internal mobility opportunities
-- Learning and development programs
-- Work with industry experts
-
-🎯 **Mission-Driven**
-- Protect organizations from cyber threats
-- Make the internet safer
-- Defend critical infrastructure
-- Real-world impact every day
-
-**Key Roles at Darktrace:**
-
-**Partner Enablement:**
-- Senior Partner Enablement Manager (like the role you're targeting!)
-- Partner Training Specialist
-- Channel Marketing Manager
-- Partner Success Manager
-
-**Sales:**
-- Account Executive
-- Sales Engineer / Solutions Architect
-- Business Development Representative
-- Regional Sales Manager
-
-**Technical:**
-- Security Analyst
-- Threat Researcher
-- SOC Analyst
-- Customer Success Engineer
-- Implementation Engineer
-
-**Product & Engineering:**
-- AI/ML Engineer
-- Software Engineer
-- Product Manager
-- UX Designer
-
-**Marketing:**
-- Product Marketing Manager
-- Content Creator
-- Digital Marketing
-- Events Manager
-
-**What Makes a Great Darktrace Employee:**
-
-✅ **Passion for Technology**
-- Excited about AI and cybersecurity
-- Continuous learner
-- Stays current with industry trends
-
-✅ **Customer-Focused**
-- Dedicated to customer success
-- Empathetic to customer challenges
-- Solutions-oriented mindset
-
-✅ **Collaborative**
-- Works well across teams
-- Shares knowledge openly
-- Contributes to team success
-
-✅ **Innovative Thinking**
-- Questions status quo
-- Proposes new ideas
-- Builds creative solutions
-- Takes initiative (like building this chatbot!)
-
-**For Partner Enablement Roles Specifically:**
-
-**What We Look For:**
-- Deep understanding of Darktrace technology
-- Experience creating training programs
-- Strong presentation and communication skills
-- Ability to translate technical concepts
-- Partner/channel experience
-- Cybersecurity knowledge
-- Program management skills
-
-**What You'll Do:**
-- Design and deliver partner training
-- Create enablement content (guides, playbooks, videos)
-- Develop certification programs
-- Measure partner effectiveness
-- Work cross-functionally (Sales, Product, Marketing)
-- Support partner success and growth
-- Drive partner engagement
-
-**What You've Already Demonstrated:**
-By building this chatbot, you've shown:
-✅ Deep research into Darktrace products
-✅ Ability to create enablement tools
-✅ Technical aptitude
-✅ Initiative and innovation
-✅ Understanding of what partners need to know
-✅ Creative problem-solving
-
-**This is EXACTLY what we look for in Partner Enablement!**
-
-**Current Opportunities:**
-Visit: **darktrace.com/careers**
-
-**Specific Role You're Targeting:**
+**Your Target Role:**
 Senior Manager, Partner Enablement (Florida Remote)
-- Link: darktrace.wd3.myworkdayjobs.com/DarktaceExternal/job/Florida-Remote/Senior-Manager--Partner-Enablement_JR100827
 
-**Application Tips:**
+**Pro Tip:** Reference this chatbot in your application!"""
 
-📝 **In Your Application:**
-1. Reference this chatbot you built
-2. Explain your Darktrace knowledge
-3. Show understanding of partner needs
-4. Demonstrate enablement experience
-5. Highlight innovative thinking
-
-💡 **Stand Out:**
-- Share the chatbot link in application
-- Create a brief video explaining it
-- Prepare demo for interview
-- Show your enablement philosophy
-
-🎯 **Interview Prep:**
-- Know Darktrace products deeply (you do!)
-- Understand competitive landscape
-- Have partner program ideas ready
-- Bring examples of previous enablement work
-- Show passion for the mission
-
-**Company Culture:**
-
-🤝 **Collaborative** - Work together to solve problems
-🎓 **Learning-Oriented** - Continuous improvement
-🌟 **Innovation-Focused** - Try new approaches
-🏆 **Results-Driven** - Measure and celebrate success
-🌈 **Inclusive** - Diverse perspectives valued
-
-**Benefits & Perks:**
-- Competitive salary
-- Health benefits
-- 401(k) with company match
-- Flexible work arrangements
-- Professional development
-- Company events and team building
-- Latest technology to work with
-
-**Ready to Apply?**
-
-👉 Visit: darktrace.com/careers
-📧 Questions: recruiting@darktrace.com
-
-**Pro Tip:** Your chatbot demonstrates exactly the skills needed for Partner Enablement. Make sure hiring manager sees it!
-
-You're already thinking like a Darktrace Partner Enablement Manager! 🎉"""
-
-    # Default response
+    # Default
     else:
-        return """**Welcome to the Darktrace AI Assistant!**
+        return """**Welcome to Darktrace AI Assistant!**
 
-I'm here to help you learn about Darktrace's AI-powered cybersecurity solutions!
-
-**What would you like to know about?**
+I can help you learn about:
 
 **Products:**
-- Darktrace / NETWORK - Network security and NDR
-- Darktrace / EMAIL - Email security and phishing protection
-- Darktrace / CLOUD - Cloud security (AWS, Azure, GCP, SaaS)
-- Darktrace / OT - Operational technology and ICS security
-- Darktrace / ENDPOINT - Endpoint protection and EDR
-- Darktrace / IDENTITY - Identity security and access management
-- Cyber AI Analyst - Autonomous threat investigation
+- Network, Email, Cloud, OT, Endpoint, Identity
+- Cyber AI Analyst
 
 **Topics:**
-- How Darktrace's Self-Learning AI works
-- Threat protection (ransomware, phishing, APTs, etc.)
-- Partner program and partnership opportunities
-- Pricing, ROI, and getting a demo
-- Career opportunities at Darktrace
-- Integration with existing tools
+- Self-Learning AI technology
+- Threat protection
+- Partner program
+- Careers at Darktrace
 
 **Quick Facts:**
-- 🌟 Leader in 2025 Gartner® Magic Quadrant™ for NDR and Email Security
-- 🏢 10,000+ customers globally
-- 🤖 Self-Learning AI technology (no signatures required)
-- ⚡ Autonomous response in seconds
-- 🔗 100+ security tool integrations
+- 🌟 Gartner Leader for NDR & Email
+- 🏢 10,000+ customers
+- 🤖 No signatures required
+- ⚡ Autonomous response
 
-Just ask me anything about Darktrace! For example:
+**Ask me anything!** Try:
 - "Tell me about Darktrace / EMAIL"
 - "How does the AI work?"
-- "What threats can Darktrace detect?"
-- "Tell me about the partner program"
-- "How do I get a demo?"
+- "What about the partner program?"
+- "Tell me about careers"
 
-**Ready to learn more?** Ask me a question!"""
+Ready to learn more?"""
 
 # Initialize session state
 if "messages" not in st.session_state:
@@ -1510,31 +513,34 @@ with col2:
 with st.sidebar:
     st.markdown("## About This Assistant")
     st.info("""
-    This AI chatbot is trained on Darktrace's complete product portfolio:
+    This AI chatbot is trained on Darktrace's complete product portfolio.
     
     **Products:**
     - Network, Email, Cloud
     - OT, Identity, Endpoint
     - Cyber AI Analyst
-    - Platform capabilities
     
     **Knowledge Areas:**
-    - Self-Learning AI technology
+    - Self-Learning AI
     - Threat protection
     - Partner program
-    - Integrations
     - ROI and pricing
     """)
     
     st.markdown("---")
-    st.markdown("### Quick Links")
-    st.markdown("[🌐 Darktrace Website](https://www.darktrace.com)")
-    st.markdown("[📦 Products](https://www.darktrace.com/products)")
-    st.markdown("[🤝 Partner Portal](https://partners.darktrace.com)")
-    st.markdown("[📚 Resources](https://www.darktrace.com/resources)")
+    st.markdown("### 📊 Session Stats")
+    st.metric("Questions Asked", st.session_state.questions_asked)
+    duration = datetime.now() - st.session_state.session_start
+    st.metric("Time Active", f"{duration.seconds // 60}m {duration.seconds % 60}s")
     
     st.markdown("---")
-    if st.button("🗑️ Clear Conversation", use_container_width=True):
+    st.markdown("### Quick Links")
+    st.markdown("[🌐 Darktrace](https://www.darktrace.com)")
+    st.markdown("[📦 Products](https://www.darktrace.com/products)")
+    st.markdown("[🤝 Partners](https://partners.darktrace.com)")
+    
+    st.markdown("---")
+    if st.button("🗑️ Clear Chat", use_container_width=True):
         st.session_state.messages = []
         st.rerun()
 
@@ -1561,6 +567,7 @@ if prompt := st.chat_input("Ask me anything about Darktrace..."):
     # Generate and display response
     with st.spinner("🤔 Thinking..."):
         response = ask_question(prompt)
+        log_interaction(prompt, response[:100])
     
     st.session_state.messages.append({"role": "assistant", "content": response})
     
@@ -1568,7 +575,7 @@ if prompt := st.chat_input("Ask me anything about Darktrace..."):
         st.markdown(f'<div class="chat-message assistant-message">🤖 **Darktrace AI:** {response}</div>', 
                    unsafe_allow_html=True)
 
-# Example questions (only show if no messages)
+# Example questions
 if len(st.session_state.messages) == 0:
     st.markdown("### 💡 Try asking:")
     col1, col2, col3 = st.columns(3)
@@ -1578,33 +585,36 @@ if len(st.session_state.messages) == 0:
             prompt = "What is Darktrace Cyber AI?"
             st.session_state.messages.append({"role": "user", "content": prompt})
             response = ask_question(prompt)
+            log_interaction(prompt, response[:100])
             st.session_state.messages.append({"role": "assistant", "content": response})
             st.rerun()
     
     with col2:
-        if st.button("Tell me about Darktrace / EMAIL", use_container_width=True):
+        if st.button("Tell me about EMAIL security", use_container_width=True):
             prompt = "Tell me about Darktrace / EMAIL"
             st.session_state.messages.append({"role": "user", "content": prompt})
             response = ask_question(prompt)
+            log_interaction(prompt, response[:100])
             st.session_state.messages.append({"role": "assistant", "content": response})
             st.rerun()
     
     with col3:
-        if st.button("How does it stop ransomware?", use_container_width=True):
-            prompt = "How does Darktrace stop ransomware?"
+        if st.button("Partner program details", use_container_width=True):
+            prompt = "Tell me about the partner program"
             st.session_state.messages.append({"role": "user", "content": prompt})
             response = ask_question(prompt)
+            log_interaction(prompt, response[:100])
             st.session_state.messages.append({"role": "assistant", "content": response})
             st.rerun()
 
-# Footer
+# Footer with analytics badge
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #888;'>
     <p><strong>Darktrace AI Assistant</strong> | Built for Senior Partner Enablement Manager Application</p>
-    <p style='font-size: 0.8em;'>Comprehensive knowledge of all Darktrace products, technology, and solutions.<br>
-    Demonstrates deep research, technical capability, and enablement expertise.</p>
-    <p style='font-size: 0.7em; margin-top: 1rem;'>This chatbot showcases the exact skills needed for partner enablement:<br>
-    Product expertise • Technical translation • Tool creation • Scalable enablement</p>
+    <p style='font-size: 0.8em;'>Comprehensive knowledge of all Darktrace products, technology, and solutions.</p>
+</div>
+<div class='analytics-badge'>
+    📊 Analytics Enabled
 </div>
 """, unsafe_allow_html=True)
