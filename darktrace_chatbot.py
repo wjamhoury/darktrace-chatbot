@@ -13,17 +13,17 @@ st.set_page_config(
 
 # ============= ANALYTICS SETUP =============
 # Replace with your Google Analytics Measurement ID
-GOOGLE_ANALYTICS_ID = "G-V40M62X7HE"
+GOOGLE_ANALYTICS_ID = "G-V40M62X7HE"  # CHANGE THIS!
 
 # Inject Google Analytics
 GA_JS = f"""
 <!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-V40M62X7HE"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id={GOOGLE_ANALYTICS_ID}"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){{dataLayer.push(arguments);}}
   gtag('js', new Date());
-  gtag('config', 'G-V40M62X7HE');
+  gtag('config', '{GOOGLE_ANALYTICS_ID}');
   
   // Track custom events
   function trackQuestion(question) {{
