@@ -18,12 +18,12 @@ GOOGLE_ANALYTICS_ID = "G-V40M62X7HE"
 # Inject Google Analytics
 GA_JS = f"""
 <!-- Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id={GOOGLE_ANALYTICS_ID}"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V40M62X7HE"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){{dataLayer.push(arguments);}}
   gtag('js', new Date());
-  gtag('config', '{GOOGLE_ANALYTICS_ID}');
+  gtag('config', 'G-V40M62X7HE');
   
   // Track custom events
   function trackQuestion(question) {{
