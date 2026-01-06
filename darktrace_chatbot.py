@@ -1,6 +1,5 @@
 import streamlit as st
-import requests
-import json
+import streamlit.components.v1 as components
 
 # Page config - MUST be first Streamlit command
 st.set_page_config(
@@ -9,20 +8,86 @@ st.set_page_config(
     layout="wide"
 )
 
-# Google Analytics 4 - Inject into page head using markdown
-# This method injects the script into the actual page, not an iframe
-st.markdown("""
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-V40M62X7HE"></script>
+# =============================================================================
+# GOOGLE ANALYTICS 4 TRACKING
+# Measurement ID: G-V40M62X7HE
+# =============================================================================
+
+GA_TRACKING_ID = "G-V40M62X7HE"
+
+# Method 1: Try to inject into Streamlit's index.html (works on some deployments)
+def try_inject_ga():
+    """Attempt to inject GA into Streamlit's index.html - wrapped in try/except"""
+    try:
+        import os
+        import re
+        
+        GA_CODE = f"""
+<!-- Google tag (gtag.js) - GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={GA_TRACKING_ID}"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
+  function gtag(){{dataLayer.push(arguments);}}
   gtag('js', new Date());
-  gtag('config', 'G-V40M62X7HE');
+  gtag('config', '{GA_TRACKING_ID}');
 </script>
-""", unsafe_allow_html=True)
+"""
+        index_path = os.path.join(os.path.dirname(st.__file__), 'static', 'index.html')
+        
+        with open(index_path, 'r') as f:
+            data = f.read()
+        
+        if GA_TRACKING_ID not in data:
+            with open(index_path, 'w') as f:
+                new_data = re.sub('<head>', '<head>' + GA_CODE, data)
+                f.write(new_data)
+        return True
+    except (PermissionError, OSError, IOError):
+        return False
 
-# Custom CSS for Darktrace branding
+# Method 2: Fallback - Use components.html to inject tracking
+def inject_ga_via_component():
+    """Inject GA via components - tracks within iframe"""
+    ga_code = f"""
+    <script async src="https://www.googletagmanager.com/gtag/js?id={GA_TRACKING_ID}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){{dataLayer.push(arguments);}}
+        gtag('js', new Date());
+        gtag('config', '{GA_TRACKING_ID}', {{
+            'page_title': 'Darktrace AI Assistant',
+            'page_location': window.location.href,
+            'page_path': window.location.pathname
+        }});
+        
+        // Try to also track in parent window
+        try {{
+            if (window.parent && window.parent !== window) {{
+                var parentScript = window.parent.document.createElement('script');
+                parentScript.src = 'https://www.googletagmanager.com/gtag/js?id={GA_TRACKING_ID}';
+                parentScript.async = true;
+                window.parent.document.head.appendChild(parentScript);
+                
+                window.parent.dataLayer = window.parent.dataLayer || [];
+                window.parent.gtag = function(){{window.parent.dataLayer.push(arguments);}};
+                window.parent.gtag('js', new Date());
+                window.parent.gtag('config', '{GA_TRACKING_ID}');
+            }}
+        }} catch(e) {{
+            console.log('GA parent injection blocked by CORS');
+        }}
+    </script>
+    """
+    components.html(ga_code, height=0, width=0)
+
+# Try method 1 first, fall back to method 2
+if not try_inject_ga():
+    inject_ga_via_component()
+
+# =============================================================================
+# CUSTOM CSS FOR DARKTRACE BRANDING
+# =============================================================================
+
 st.markdown("""
 <style>
     .main {
@@ -63,7 +128,10 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Comprehensive Darktrace knowledge base
+# =============================================================================
+# COMPREHENSIVE DARKTRACE KNOWLEDGE BASE
+# =============================================================================
+
 DARKTRACE_KNOWLEDGE = """
 === DARKTRACE COMPANY OVERVIEW ===
 Darktrace is the global leader in cyber security AI, protecting over 10,000 organizations worldwide. 
@@ -360,6 +428,10 @@ Darktrace protects organizations across all industries:
 - Professional Services (legal, consulting, accounting)
 - Media & Entertainment
 """
+
+# =============================================================================
+# QUESTION ANSWERING FUNCTION - FULL DETAILED RESPONSES
+# =============================================================================
 
 def ask_question(question):
     """Process user question and return response"""
@@ -1505,6 +1577,10 @@ Just ask me anything about Darktrace! For example:
 - "How do I get a demo?"
 
 **Ready to learn more?** Ask me a question!"""
+
+# =============================================================================
+# STREAMLIT UI
+# =============================================================================
 
 # Initialize session state
 if "messages" not in st.session_state:
