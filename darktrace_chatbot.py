@@ -2,16 +2,16 @@ import streamlit as st
 import requests
 import json
 
-# Page config
+# Page config - MUST be first Streamlit command
 st.set_page_config(
     page_title="Darktrace AI Assistant",
     page_icon="🛡️",
     layout="wide"
 )
 
-# Google Analytics 4 Implementation
-# Measurement ID: G-V40M62X7HE
-GA_TRACKING_CODE = """
+# Google Analytics 4 - Inject into page head using markdown
+# This method injects the script into the actual page, not an iframe
+st.markdown("""
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-V40M62X7HE"></script>
 <script>
@@ -20,10 +20,7 @@ GA_TRACKING_CODE = """
   gtag('js', new Date());
   gtag('config', 'G-V40M62X7HE');
 </script>
-"""
-
-# Inject GA tracking code into the page
-st.components.v1.html(GA_TRACKING_CODE, height=0, width=0)
+""", unsafe_allow_html=True)
 
 # Custom CSS for Darktrace branding
 st.markdown("""
