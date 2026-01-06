@@ -1,26 +1,53 @@
 import streamlit as st
-import requests
-import json
+import os
+import re
 
-# Page config - MUST be first Streamlit command
+# =============================================================================
+# GOOGLE ANALYTICS INJECTION - This method actually works on Streamlit Cloud!
+# Based on: https://discuss.streamlit.io/t/how-to-add-google-analytics-or-js-code-in-a-streamlit-app/1610
+# =============================================================================
+
+GA_TRACKING_ID = "G-V40M62X7HE"
+
+GA_CODE = f"""
+<!-- Google tag (gtag.js) - GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={GA_TRACKING_ID}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+  gtag('config', '{GA_TRACKING_ID}');
+</script>
+"""
+
+def inject_ga():
+    """Inject Google Analytics into Streamlit's index.html file"""
+    # Get the path to Streamlit's static index.html
+    index_path = os.path.join(os.path.dirname(st.__file__), 'static', 'index.html')
+    
+    # Read the current index.html
+    with open(index_path, 'r') as f:
+        data = f.read()
+    
+    # Check if GA is already injected (look for our tracking ID)
+    if GA_TRACKING_ID not in data:
+        # Inject GA code right after <head>
+        with open(index_path, 'w') as f:
+            new_data = re.sub('<head>', '<head>' + GA_CODE, data)
+            f.write(new_data)
+
+# Inject GA before anything else
+inject_ga()
+
+# =============================================================================
+# PAGE CONFIG - Must come after GA injection but before other Streamlit calls
+# =============================================================================
+
 st.set_page_config(
     page_title="Darktrace AI Assistant",
     page_icon="🛡️",
     layout="wide"
 )
-
-# Google Analytics 4 - Inject into page head using markdown
-# This method injects the script into the actual page, not an iframe
-st.markdown("""
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-V40M62X7HE"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-V40M62X7HE');
-</script>
-""", unsafe_allow_html=True)
 
 # Custom CSS for Darktrace branding
 st.markdown("""
